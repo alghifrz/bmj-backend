@@ -79,8 +79,8 @@ func TestEmbeddedInitialMigration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("load embedded migrations: %v", err)
 	}
-	if len(got) != 3 {
-		t.Fatalf("len = %d, want 3", len(got))
+	if len(got) != 4 {
+		t.Fatalf("len = %d, want 4", len(got))
 	}
 	if got[0].Version != 1 || got[0].Name != "initial_schema" {
 		t.Fatalf("migration = %06d_%s", got[0].Version, got[0].Name)
@@ -99,6 +99,15 @@ func TestEmbeddedInitialMigration(t *testing.T) {
 	}
 	if !strings.Contains(got[2].UpSQL, "about_body") {
 		t.Fatal("about migration missing body column")
+	}
+	if got[3].Version != 4 || got[3].Name != "analytics_events" {
+		t.Fatalf("migration = %06d_%s", got[3].Version, got[3].Name)
+	}
+	if !strings.Contains(got[3].UpSQL, "CREATE TABLE analytics_events") {
+		t.Fatal("analytics migration missing events table")
+	}
+	if !strings.Contains(got[3].DownSQL, "DROP TABLE IF EXISTS analytics_events") {
+		t.Fatal("analytics migration down script missing table drop")
 	}
 
 	for _, table := range []string{
